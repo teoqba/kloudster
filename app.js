@@ -12,9 +12,8 @@ var bodyParser = require('body-parser');
 //	baudrate: 57600, parser: serialport.parsers.readline("\r\n")
 //});
 
-var mongo = require('mongodb');
-var monk = require('monk');
-var db = monk('localhost:27017/k1test');
+var mongo = require('mongoskin');
+var db = mongo.db("mongodb://localhost:27017/k1test", {native_parser:true});
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -37,7 +36,7 @@ sp.on("open", function() {
 	sp.flush(function(){});
 	console.log('open');
 	sp.on('data', function(data){
-		var collection = db.get('datapoints');
+		var collection = db.collection('datapoints');
 		collection.insert(JSON.parse(data),function(err,doc) {
 			if (err){
 				conslole.log("INSERTION");
@@ -45,8 +44,8 @@ sp.on("open", function() {
 		});
 	});
 });
-
 */
+
 app.use(function(req, res, next){
 	req.db = db;
 	next();
