@@ -1,0 +1,8 @@
+extends layout
+
+block content
+	h1= title
+	ul
+		each point, i in data
+			li
+				Data #{point.rh} #{point.temp}

@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	h1= title
+	table
+		thead
+			th Relative Humidity [%]
+			th Temperature [C]
+		tbody
+			each point, i in data
+				tr
+					td #{point.rh} 
+					td #{point.temp}
