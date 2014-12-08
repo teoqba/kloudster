@@ -1,0 +1,8 @@
+{
+    "sparkAccessToken": "",
+    "sparkDeviceID": "",
+    "twilioAccountSID": "",
+    "twilioAuthToken": "",
+    "smsToPhoneNumber": "",
+    "smsFromPhoneNumber": ""
+}

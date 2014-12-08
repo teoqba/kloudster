@@ -4,11 +4,15 @@ block content
 	h1= title
 	table
 		thead
-			th Relative Humidity [%]
+			th Time of the day
+			th Elapsed time
+			th Relative humidity [%]
 			th Temperature [C]
 		tbody
 			each point, i in data
 				tr
+					td #{point.totd}
+					td #{time}
 					td #{point.rh} 
 					td #{point.temp}
 

@@ -4,6 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var getDateTime = require('./getDateTime');
+var fs = require('fs');
 
 //Serial port stuff
 //var serialport = require("serialport");
@@ -12,11 +14,32 @@ var bodyParser = require('body-parser');
 //	baudrate: 57600, parser: serialport.parsers.readline("\r\n")
 //});
 
+// Spark Core + Twilio
+var spark = require('sparknode');
+var twilio = require('twilio');
+if (!fs.existsSync('./config.json')) {
+	console.error('Please create a config.json -- check config.json.sample');
+	process.exit();
+}
+
+var config = require('./config.json');
+
+// Mongo
 var mongo = require('mongoskin');
 var db = mongo.db("mongodb://localhost:27017/k1test", {native_parser:true});
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+
+// Spark setup
+var core = new spark.Core({
+	accessToken: config.sparkAccessToken,
+        id: config.sparkDeviceID
+});
+
+//Twilio setup
+var twilioClien = require('twilio')(config.twilioAccountSID, 
+		                    config.twilioAuthToken);
 
 var app = express();
 
@@ -45,6 +68,18 @@ sp.on("open", function() {
 	});
 });
 */
+
+core.on('meas', function(data) {
+	var totd = getDateTime.getDateTime();
+	var jData = JSON.parse(data.data);
+	jData.totd = totd.totd;
+	var collection = db.collection('SiliconMes');
+	collection.insert(jData, function(err,doc) {
+		if (err){
+			console.log("Problem inserting data");
+		}
+	});
+});
 
 app.use(function(req, res, next){
 	req.db = db;
