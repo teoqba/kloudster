@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var getDateTime = require('./getDateTime');
+var sendTextMessage= require('./sendTextMessage');
 var fs = require('fs');
 
 //Serial port stuff
@@ -26,7 +27,11 @@ var config = require('./config.json');
 
 // Mongo
 var mongo = require('mongoskin');
-var db = mongo.db("mongodb://localhost:27017/k1test", {native_parser:true});
+var dbAddress = 'mongodb://' + config.dbUser + ':' + config.dbPwd +
+                 '@localhost:27017/' + config.dbName;
+var db = mongo.db(dbAddress,{native_parser:true});
+
+//var db = mongo.db('mongodb://sparkLog:SparkKloudster@localhost:27017/testDB',{native_parser:true});
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -70,15 +75,20 @@ sp.on("open", function() {
 */
 
 core.on('meas', function(data) {
+	console.log('Got Event');
 	var totd = getDateTime.getDateTime();
 	var jData = JSON.parse(data.data);
 	jData.totd = totd.totd;
-	var collection = db.collection('SiliconMes');
+	var collection = db.collection(config.collection);
 	collection.insert(jData, function(err,doc) {
 		if (err){
-			console.log("Problem inserting data");
+			console.log("Problem inserting data"+ err);
 		}
 	});
+});
+
+core.on('alarm', function(data) {
+	sendTextMessage("Spark Core RESET");
 });
 
 app.use(function(req, res, next){

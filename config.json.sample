@@ -4,5 +4,9 @@
     "twilioAccountSID": "",
     "twilioAuthToken": "",
     "smsToPhoneNumber": "",
-    "smsFromPhoneNumber": ""
+    "smsFromPhoneNumber": "",
+    "dbUser":"",
+    "dbPwd":"",
+    "dbName":"",
+    "collection":""
 }

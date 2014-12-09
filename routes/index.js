@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var util = require('util');
+var config = require('../config.json');
 /* GET home page. */
-router.get('/', function(req, res) {
+/*router.get('/', function(req, res) {
 	var db = req.db;
 	var collection = db.collection('datapoints');
 	collection.find().toArray(function(err, docs){
@@ -21,10 +22,19 @@ router.get('/', function(req, res) {
 		});
 	});
 });
+*/
+router.get('/', function(req, res) {
+	var db = req.db;
+	var collection = db.collection(config.collection);
+	collection.find().toArray(function(err,docs){
+		res.render('index',{title:'Counter test','data':docs 
+		});
+	});
+});
 
 router.get('/rh',function(req,res) {
 	var db = req.db;
-	var collection = db.collection('SiliconMes');
+	var collection = db.collection(config.collection);
 	collection.find().toArray(function(err,docs){
 		res.render('rh', {'data':docs, 'title':'RH in Silicon'
 		});

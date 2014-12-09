@@ -2,3 +2,5 @@ data/*
 node_modules/
 npm-debug.log
 config.json
+*.log
+logs/*
