@@ -1,15 +1,32 @@
 extends layout
 
 block content
+	h1= titleLive
+	#listTable
+		table
+			thead
+				th(style='width:150px;') Experiment Name
+				th Description
+			tbody
+				each point, i in data
+					if point.live
+						tr
+							td 
+								a(href="/db/#{point.name}")= point.name
+							td #{point.description}
+
 	h1= title
-	table
-		thead
-			th Time of the day
-			th Counter
-		tbody
-			each point, i in data
-				tr
-					td #{point.totd} 
-					td #{point.count}
+	#listTable
+		table
+			thead
+				th(style='width:150px;') Experiment Name
+				th Description
+			tbody
+				each point, i in data
+					if !point.live
+						tr
+							td 
+								a(href="/db/#{point.name}")= point.name
+							td #{point.description}
 
-
+	
