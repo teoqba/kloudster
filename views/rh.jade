@@ -2,18 +2,20 @@ extends layout
 
 block content
 	h1= title
-	table
-		thead
-			th Time of the day
-			th Elapsed time
-			th Relative humidity [%]
-			th Temperature [C]
-		tbody
-			each point, i in data
-				tr
-					td #{point.totd}
-					td #{point.time}
-					td #{point.rh} 
-					td #{point.temp}
+	#resultTable
+		table
+			thead
+				th Time of the day
+				th Elapsed time [s]
+				th Relative humidity [%]
+				th Temperature [C]
+			tbody
+				each point, i in data
+					if !point.description
+						tr
+							td #{point.totd}
+							td #{point.time}
+							td #{point.rh} 
+							td #{point.temp}
 
 

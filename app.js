@@ -4,16 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var getDateTime = require('./getDateTime');
-var sendTextMessage= require('./sendTextMessage');
+var getDateTime = require('./functions/getDateTime');
+var sendTextMessage = require('./functions/sendTextMessage');
+var convJSONValsToNumber = require('./functions/convJSONValsToNumber');
 var fs = require('fs');
-
-//Serial port stuff
-//var serialport = require("serialport");
-//var SerialPort = serialport.SerialPort;
-//var sp = new SerialPort("/dev/cu.usbmodem1421", {
-//	baudrate: 57600, parser: serialport.parsers.readline("\r\n")
-//});
 
 // Spark Core + Twilio
 var spark = require('sparknode');
@@ -59,25 +53,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-/*
-sp.on("open", function() {
-	sp.flush(function(){});
-	console.log('open');
-	sp.on('data', function(data){
-		var collection = db.collection('datapoints');
-		collection.insert(JSON.parse(data),function(err,doc) {
-			if (err){
-				conslole.log("INSERTION");
-			}
-		});
-	});
-});
-*/
 
 core.on('meas', function(data) {
 	console.log('Got Event');
 	var totd = getDateTime.getDateTime();
 	var jData = JSON.parse(data.data);
+	jData = convJSONValsToNumber.convJSONValsToNumber(jData);
 	jData.totd = totd.totd;
 	var collection = db.collection(config.collection);
 	collection.insert(jData, function(err,doc) {

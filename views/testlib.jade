@@ -1,0 +1,18 @@
+extends layout
+
+block content
+	h1= title
+	#listTable
+		table
+			thead
+				th Experiment Name
+				th Description
+			tbody
+				each point, i in data
+					tr
+						td 
+							a(href="/db/#{point.name}")= point.name
+						td #{point.description}
+
+
+	
