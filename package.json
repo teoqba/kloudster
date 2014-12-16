@@ -17,7 +17,12 @@
     "mongoskin": "*",
     "sparknode" : "*",
     "twilio": "*",
-    "async":"*"
-
+    "async":"*",
+    "bcrypt-nodejs":"*",
+    "passport":"*",
+    "passport-local":"*",
+    "connect-flash":"*",
+    "express-session":"*",
+    "mongoose":"*"
   }
 }

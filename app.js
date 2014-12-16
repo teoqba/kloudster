@@ -27,8 +27,11 @@ var db = mongo.db(dbAddress,{native_parser:true});
 
 //var db = mongo.db('mongodb://sparkLog:SparkKloudster@localhost:27017/testDB',{native_parser:true});
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+//Mongoose for Passport
+var dbConfig = require('./dbm');
+var mongoose = require('mongoose');
+// Connect to DB
+mongoose.connect(dbConfig.url);
 
 // Spark setup
 var core = new spark.Core({
@@ -54,6 +57,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Configure passport
+// Based on: http://code.tutsplus.com/tutorials/authenticating-nodejs-applications-with-passport--cms-21619
+
+var passport = require('passport');
+var expressSession = require('express-session');
+app.use(expressSession({secret: 'mySecretKey'}));
+app.use(passport.initialize());
+app.use(passport.session());
+var flash = require('connect-flash');
+app.use(flash());
+var initPassport = require('./passport/init');
+initPassport(passport);
+
+var routes = require('./routes/index')(passport);
+
 core.on('meas', function(data) {
 	console.log('Got Event');
 	var totd = getDateTime.getDateTime();
@@ -78,7 +96,6 @@ app.use(function(req, res, next){
 });
 
 app.use('/', routes);
-app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
