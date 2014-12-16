@@ -8,26 +8,26 @@ var bCrypt = require('bcrypt-nodejs');
 var isAuthenticated = function(req,res,next) {
 	if(req.isAuthenticated())
 		return next();
-	res.redirect('/');
+	res.redirect('/auth');
 }
 module.exports = function(passport){
 
  	/* GET login page. */
-	router.get('/', function(req, res) {
+	router.get('/auth', function(req, res) {
     	// Display the Login page with any flash message, if any
-		res.render('index', { message: req.flash('message') });
+		res.render('auth', { message: req.flash('message') });
 	});  
 
 	/* Handle Login POST */
 	router.post('/login', passport.authenticate('login', {
-				successRedirect: '/home',
-				failureRedirect: '/',
+				successRedirect: '/',
+				failureRedirect: '/auth',
 				failureFlash : true  
 			}));
 
 	/* GET home page. */
 	// Experiment list
-	router.get('/home', isAuthenticated, function(req, res) {
+	router.get('/', isAuthenticated, function(req, res) {
 		var db = req.db;
 		var u = req.user.username;
 		console.log("USER");
@@ -66,7 +66,7 @@ module.exports = function(passport){
 					if (i == indexLive) cleanCollList[i].live = 1; //it is currenty going experiment
 					
 				}
-				res.render('home', {'data':cleanCollList,'title':'Past Experiments',
+				res.render('index', {'data':cleanCollList,'title':'Past Experiments',
 					               'titleLive':'Ongoing Experiment'
 				});
 			});

@@ -1,17 +1,32 @@
-extends layout-login
+extends layout
 
 block content
-	div.container
-		div.row
-			div.col-sm-6.col-md-4.col-md-offset-4
-				h1.text-center.login-title kloudster.io
-					div.account-wall
-						form(class='form-signin', action='/login', method='POST')
-							input(type='text', name='username' class='form-control', placeholder='Email',required, autofocus)
-							input(type='password', name='password' class='form-control', placeholder='Password', required)
-							button(class='btn btn-lg btn-primary btn-block', type='submit') Sign in
-							span.clearfix
-					#message
-					if message
-						h1.text-center.error-message #{message}
+	h1= titleLive
+	#listTable
+		table
+			thead
+				th(style='width:150px;') Experiment Name
+				th Description
+			tbody
+				each point, i in data
+					if point.live
+						tr
+							td 
+								a(href="/db/#{point.name}")= point.name
+							td #{point.description}
 
+	h1= title
+	#listTable
+		table
+			thead
+				th(style='width:150px;') Experiment Name
+				th Description
+			tbody
+				each point, i in data
+					if !point.live
+						tr
+							td 
+								a(href="/db/#{point.name}")= point.name
+							td #{point.description}
+
+	
