@@ -29,6 +29,9 @@ module.exports = function(passport){
 	// Experiment list
 	router.get('/home', isAuthenticated, function(req, res) {
 		var db = req.db;
+		var u = req.user.username;
+		console.log("USER");
+		console.log(u);
 		db.collectionNames(function(err,items){
 			var cleanCollList = {};
 			var asyncArray = []; //for async module, will contain collection names
@@ -122,8 +125,31 @@ module.exports = function(passport){
 			}
 		});
 	});
+
+	router.get('/newexp',isAuthenticated, function(req,res){
+		res.render('newexp', {title:"Start new experiment"
+		});
+	});
+
+	router.post('/addexp',isAuthenticated, function(req,res){
+		var db = req.db;
 	
+		var expName = req.body.expname;
+		var desc      = req.body.desc;
+	
+		var collection = db.collection('Experiments');
+
+		collection.update({"_id":1},{"_id":1,"currentExp":expName, "description":desc},{upsert:true},
+					function(err,doc){
+						if (err) {
+							res.send("Failed to create new experiment");
+						}
+						else {
+							res.location("home");
+							res.redirect("home");
+						}
+					});
+	});
 	return router;	
 }
 
-//module.exports = router;

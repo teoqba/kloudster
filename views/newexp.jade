@@ -1,0 +1,8 @@
+extends layout
+
+block content
+	h1= title
+		form#formAddExp(name="addexp",method="post",action="/addexp")
+			input#inputExpName(type="text", placeholder="Experiment name", name="expname")
+			input#inputUserPwd(type="text", placeholder="Description", name="desc")
+			button#btnSubmit(type="submit") submit
