@@ -4,7 +4,6 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var getDateTime = require('./functions/getDateTime');
 var sendTextMessage = require('./functions/sendTextMessage');
 var convJSONValsToNumber = require('./functions/convJSONValsToNumber');
 var fs = require('fs');
@@ -21,10 +20,10 @@ var config = require('./config.json');
 
 // Mongo
 var mongo = require('mongoskin');
-var dbAddress = 'mongodb://' + config.dbUser + ':' + config.dbPwd +
-                 '@localhost:27017/' + config.dbName;
-var db = mongo.db(dbAddress,{native_parser:true});
-
+//var dbAddress = 'mongodb://' + config.dbUser + ':' + config.dbPwd +
+//                 '@localhost:27017/' + config.dbName;
+//var db = mongo.db(dbAddress,{native_parser:true});
+var db = mongo.db('mongodb://localhost:27017/testDB');
 //var db = mongo.db('mongodb://sparkLog:SparkKloudster@localhost:27017/testDB',{native_parser:true});
 
 //Mongoose for Passport
@@ -44,6 +43,8 @@ var twilioClien = require('twilio')(config.twilioAccountSID,
 		                    config.twilioAuthToken);
 
 var app = express();
+
+app.locals.moment = require('moment');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -71,17 +72,27 @@ var initPassport = require('./passport/init');
 initPassport(passport);
 
 var routes = require('./routes/index')(passport);
-
 core.on('meas', function(data) {
 	console.log('Got Event');
-	var totd = getDateTime.getDateTime();
-	var jData = JSON.parse(data.data);
-	jData = convJSONValsToNumber.convJSONValsToNumber(jData);
-	jData.totd = totd.totd;
-	var collection = db.collection(config.collection);
-	collection.insert(jData, function(err,doc) {
-		if (err){
-			console.log("Problem inserting data"+ err);
+	var collection = db.collection('Experiments');
+	collection.findOne({'device':'Sparky','live':1},function(err,docs){
+		if (err) {
+			console.log("Coudn't find device: " + err);
+		}
+		else if (!docs)
+			console.log("No live experiments or coudn't find device");
+		else{
+			var jData = JSON.parse(data.data);
+			jData = convJSONValsToNumber.convJSONValsToNumber(jData);
+			jData.logged_on = new Date();
+			jData.userid = docs.userid;
+			jData.expname = docs.expname;
+			var collection = db.collection('Data');
+			collection.insert(jData, function(err,doc) {
+				if (err){
+					console.log("Problem inserting data"+ err);
+				}
+			});
 		}
 	});
 });

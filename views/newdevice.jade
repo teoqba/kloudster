@@ -1,0 +1,7 @@
+extends layout
+
+block content
+	h1= title
+		form#formAddDev(name="adddev",method="post",action="/adddev")
+			input#inputDevName(type="text", placeholder="Device Name", name="devname")
+			button#btnSubmit(type="submit") Submit

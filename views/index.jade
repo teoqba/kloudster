@@ -1,32 +1,44 @@
 extends layout
-
 block content
-	h1= titleLive
-	#listTable
-		table
-			thead
-				th(style='width:150px;') Experiment Name
-				th Description
-			tbody
-				each point, i in data
-					if point.live
-						tr
-							td 
-								a(href="/db/#{point.name}")= point.name
-							td #{point.description}
+  h1= titleLive
+  #listTable
+    table
+      thead
+        th(style='width:150px;') Created on
+        th(style='width:150px;') Experiment Name
+        th Description
+      tbody
+        each point, i in data
+          if point.live == 1
+            tr
+              td #{moment(point.created_on).format("YYYY/MM/DD HH:mm")}
+              td 
+                a(href="/db/#{point.expname}")= point.expname
+              td #{point.description}
+  h1 Start new experiment
+    form#formAddExp(name="addexp",method="post",action="/addexp")
+      input#inputExpName(type="text", placeholder="Experiment Name", name="expname")
+      input#inputExpDesc(type="text",placeholder="Description",name="desc")
+      select(name="expType")
+        each eType, i in eTypes
+          option(et=i) #{eType)
+      select(name="dev")
+        each device, i in devices
+          option(dev=i) #{device}
+      button#btnSubmit(type="submit") Start
 
-	h1= title
-	#listTable
-		table
-			thead
-				th(style='width:150px;') Experiment Name
-				th Description
-			tbody
-				each point, i in data
-					if !point.live
-						tr
-							td 
-								a(href="/db/#{point.name}")= point.name
-							td #{point.description}
-
-	
+  h1= title
+  #listTable
+    table
+      thead
+        th(style='width:150px;') Created on
+        th(style='width:150px;') Experiment Name
+        th Description
+      tbody
+        each point, i in data
+          if point.live != 1
+            tr
+              td #{moment(point.created_on).format("YYYY/MM/DD HH:mm")}
+              td 
+                a(href="/db/#{point.expname}")= point.expname
+              td #{point.description}
