@@ -74,7 +74,7 @@ module.exports = function(passport){
 		});
 	});
 
-	router.get('/newuser', isAuthenticated, function(req,res){
+	router.get('/newuser', isAuthenticated,function(req,res){
 		res.render('newuser', {title:"Add new user"
 		});
 	});
