@@ -62,11 +62,14 @@ module.exports = function(passport){
 	});
 	router.get('/db/:db2print', isAuthenticated, function(req,res) {
 		var db = req.db;
-		var collection = db.collection('Data');
-		collection.find({'userid':req.user.username,'expname':req.db2print})
-		                .sort({$natural:-1}).toArray(function(err,docs){
-			res.render('results', {'data':docs, 
-				          'title':'Experiment: ' + req.db2print
+		var collection = db.collection('Control');
+		collection.findOne({userid:req.user.uername,'expname':req.db2print},function(err,docsC){
+			var collection = db.collection('Data');
+			collection.find({'userid':req.user.username,'expname':req.db2print})
+			                .sort({$natural:-1}).toArray(function(err,docs){
+				res.render('results', {'data':docs,'dataC':docsC,
+					          'title':'Experiment: ' + req.db2print
+				});
 			});
 		});
 	});
@@ -77,11 +80,11 @@ module.exports = function(passport){
 	});
 	
 	router.post('/adduser', isAuthenticated, function(req,res){
-		userData = {username:req.body.username,
-			    password:req.body.password,
-		            name:req.body.name,
-		            lname:req.body.lname,
-		            phone:req.body.phone};
+		var userData = {username:req.body.username,
+		   	        password:req.body.password,
+		                name:req.body.name,
+		                lname:req.body.lname,
+		                phone:req.body.phone};
 
 		console.log(addNewUser);
 		addNewUser.addNewUser(req,userData);
@@ -155,6 +158,73 @@ module.exports = function(passport){
 				res.redirect('/');
 			}
 		});
+	});
+	//Manage experiments
+	router.post('/expmng', isAuthenticated, function(req,res){
+		var userid = req.user.username;
+		var db = req.db;
+		var collection = db.collection('Experiments');
+		if (req.body.expname_stop) {
+			var expname = req.body.expname_stop;
+			var action = "stop";
+			collection.update({"userid":userid,"expname":expname,"live":1},
+				          {$set:{"live":0}},function(err,docs){
+				if (err){
+					res.send("Error stoping experiment: "+err);
+				}
+			});
+		}
+		if  (req.body.expname_res) {
+			var expname = req.body.expname_res;
+			var action = "resume";
+		        // To resume the experiment, find first the expetiment that is 
+			// running on the same device and stop it first	
+			collection.findOne({'userid':userid,'expname':expname,'live':0},
+				          function(err,docs){
+				if (err) {
+					res.send('Error finding eperiment: '+err);
+				}
+				else {
+					// Get the device name of the experiment to be resumed
+					var deviceid = docs.device;
+					collection.update({'userid':userid, 'device':deviceid, 'live':1},
+						{$set:{'live':0}},function(err,docs){
+						if (err) {
+							res.send('Error stopping experiment: '+err);
+						}
+						else {
+							collection.update({'userid':userid,'expname':expname,'live':0},
+							{$set:{'live':1}},function(err,docs){
+								if (err) {
+									res.send('Error resuming expriment: ' + err);
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+		if (req.body.expname_del) {
+			var expname = req.body.expname_del;
+			var action = "delete";
+			collection.remove({"userid":userid,"expname":expname,"live":0},
+				          function(err,docs){
+				if (err){
+					res.send("Error removing experiment: "+err);
+				}
+				else {
+					var collection = db.collection('Data');
+					collection.remove({"userid":userid,"expname":expname},
+						          function(err,docs){
+						if (err) {
+							res.send("Error removing data for experiment: "+err);
+						}
+					});
+				}
+			});
+		}
+		res.location("/");
+		res.redirect("/");
 	});
 
 	return router;	

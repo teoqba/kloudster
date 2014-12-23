@@ -7,6 +7,5 @@
     "smsFromPhoneNumber": "",
     "dbUser":"",
     "dbPwd":"",
-    "dbName":"",
-    "collection":""
+    "dbName":""
 }

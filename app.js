@@ -20,10 +20,10 @@ var config = require('./config.json');
 
 // Mongo
 var mongo = require('mongoskin');
-//var dbAddress = 'mongodb://' + config.dbUser + ':' + config.dbPwd +
-//                 '@localhost:27017/' + config.dbName;
-//var db = mongo.db(dbAddress,{native_parser:true});
-var db = mongo.db('mongodb://localhost:27017/testDB');
+var dbAddress = 'mongodb://' + config.dbUser + ':' + config.dbPwd +
+                 '@localhost:27017/' + config.dbName;
+var db = mongo.db(dbAddress,{native_parser:true});
+//var db = mongo.db('mongodb://localhost:27017/testDB');
 //var db = mongo.db('mongodb://sparkLog:SparkKloudster@localhost:27017/testDB',{native_parser:true});
 
 //Mongoose for Passport
@@ -39,7 +39,7 @@ var core = new spark.Core({
 });
 
 //Twilio setup
-var twilioClien = require('twilio')(config.twilioAccountSID, 
+var twilioClient = require('twilio')(config.twilioAccountSID, 
 		                    config.twilioAuthToken);
 
 var app = express();

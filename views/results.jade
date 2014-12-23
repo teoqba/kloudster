@@ -1,6 +1,23 @@
 extends layout
 
 block content
+  h1 Experiment Control
+    if dataC
+      #controlTable
+        table
+          thead
+            th Pin
+            th Control
+          tbody
+            each point, i in dataC
+              tr
+                td point.pin_no
+                td
+                   button#buttonControl(type="submit") Add
+
+    form#formControl(name="control",method="post",action="/addcontrol")
+      input#inputPinName(type="text",placeholder="Input Pin Number",name="pin_no")
+      button#buttonControl(type="submit") Add
   h1= title
   #resultTable
     table

@@ -7,6 +7,7 @@ block content
         th(style='width:150px;') Created on
         th(style='width:150px;') Experiment Name
         th Description
+        th(style='width:50px;') Actions
       tbody
         each point, i in data
           if point.live == 1
@@ -15,6 +16,9 @@ block content
               td 
                 a(href="/db/#{point.expname}")= point.expname
               td #{point.description}
+              td 
+                form#formExpmng(name="doaction",method="post",action="/expmng")
+                  button#btnExpmng(type="submit",name="expname_stop",value=point.expname) Stop
   h1 Start new experiment
     form#formAddExp(name="addexp",method="post",action="/addexp")
       input#inputExpName(type="text", placeholder="Experiment Name", name="expname")
@@ -34,6 +38,7 @@ block content
         th(style='width:150px;') Created on
         th(style='width:150px;') Experiment Name
         th Description
+        th(style='width:50px;') Actions
       tbody
         each point, i in data
           if point.live != 1
@@ -42,3 +47,7 @@ block content
               td 
                 a(href="/db/#{point.expname}")= point.expname
               td #{point.description}
+              td 
+                form#formExpmng(name="expmng",method="post",action="/expmng")
+                  button#btnExpmng(type="submit",name="expname_res",value=point.expname) Resume
+                  button#btnExpmng(type="submit",name="expname_del",value=point.expname) Delete
