@@ -48,7 +48,7 @@ module.exports = function(passport){
 			else{
 				res.render('index',{'data':docs,'title':'Past Experiments',
 					   'titleLive': 'LIVE! Now',
-					   'devices':['','Sparky'],
+					   'devices':['','sparky'],
 					    'eTypes':['',"Community","Private"]
 				});
 			}
@@ -62,15 +62,24 @@ module.exports = function(passport){
 	});
 	router.get('/db/:db2print', isAuthenticated, function(req,res) {
 		var db = req.db;
-		var collection = db.collection('Control');
-		collection.findOne({userid:req.user.uername,'expname':req.db2print},function(err,docsC){
-			var collection = db.collection('Data');
-			collection.find({'userid':req.user.username,'expname':req.db2print})
-			                .sort({$natural:-1}).toArray(function(err,docs){
-				res.render('results', {'data':docs,'dataC':docsC,
-					          'title':'Experiment: ' + req.db2print
-				});
-			});
+		var collection = db.collection('Experiments');
+		collection.findOne({'userid':req.user.username,'expname':req.db2print},
+			function(err,docs1){
+				if (err) {
+					console.log('Error retrieving functions: ' + err);
+				}
+				else {
+					var functions = docs1.functions;
+					if (docs1.functions == undefined) {
+						functions = 0;}
+					var collection = db.collection('Data');
+					collection.find({'userid':req.user.username,'expname':req.db2print})
+		                	.sort({$natural:-1}).toArray(function(err,docs){
+						res.render('results', {'data':docs,'functions':functions,
+					        	  'title': req.db2print
+						});
+					});
+				}
 		});
 	});
 
@@ -86,7 +95,7 @@ module.exports = function(passport){
 		                lname:req.body.lname,
 		                phone:req.body.phone};
 
-		console.log(addNewUser);
+		//console.log(addNewUser);
 		addNewUser.addNewUser(req,userData);
 			
 		res.location("new user");
@@ -107,7 +116,7 @@ module.exports = function(passport){
 			   "created_on":new Date(),
 			   "live":1};
 		
-		// Device type and Experiment type need to given
+		// Device type and Experiment type need to be given
 		// Redirect back otherwise
 		var device = req.body.dev;
 		var type = req.body.expType;
@@ -115,7 +124,6 @@ module.exports = function(passport){
 			res.redirect("/");
 			return next();
 		}
-
 		collection.update({"userid":username,"device":req.body.dev,"live":1},
 			          {$set:{"live":0}}, function(err,doc){
 			if (err) {
@@ -159,7 +167,7 @@ module.exports = function(passport){
 			}
 		});
 	});
-	//Manage experiments
+	//Manage experiments: stop, resume, delete
 	router.post('/expmng', isAuthenticated, function(req,res){
 		var userid = req.user.username;
 		var db = req.db;
@@ -227,6 +235,84 @@ module.exports = function(passport){
 		res.redirect("/");
 	});
 
+	//Check for exposed Spark functions
+	router.post('/controlCheck',isAuthenticated, function(req,res,next){
+		var username = req.user.username;
+		var expname = req.body.expname;
+		var db = req.db;
+		var spark = req.sparkID;
+		//Find the device running this experiment
+		collection = db.collection('Experiments');
+		collection.findOne({'userid':username,'expname':expname},function(err,docs){
+			if (err) {
+				res.send('Error retrieving experiment: '+err);
+			}
+			else {
+				var device = docs.device;
+				var devicesPr = spark.getAttributesForAll();
+				devicesPr.then(function(data){
+					for (i=0; i<data.length;i++){
+						if (data[i].name == device){
+							var funcs = data[i].functions;
+						}
+					}
+					collection.update({'userid':username,'expname':expname,'device':device,'live':1},
+						          {$set:{'functions':funcs}},function(err,docs2){
+						if (err) {
+							res.send('Cannot update functions :' + err);
+						}
+						else {
+							res.location("db/"+req.body.expname);
+							res.redirect("db/"+req.body.expname);
+						}
+					});
+				});
+			}
+		});
+	});
+
+	router.post('/toggleAction',isAuthenticated, function(req,res,next){
+		var username = req.user.username;
+		var expname = req.body.expname;
+		var db = req.db;
+
+		if (req.body.fOn) {
+			var action = 'on';
+			var fname = req.body.fOn;
+		}
+		if (req.body.fOff) {
+			var action = 'off';
+			var fname = req.body.fOff;
+		}
+		var spark = req.sparkID;
+		//Find the device running this experiment
+		collection = db.collection('Experiments');
+		collection.findOne({'userid':username,'expname':expname},function(err,docs){
+			if (err) {
+				res.send('Error retrieving experiment: '+err);
+			}
+			else {
+				var device = docs.device;
+				spark.listDevices(function(err,devices) {
+					for (i=0; i<devices.length;i++){
+						if (devices[i].name == device){
+							console.log(devices[i]);
+							devices[i].callFunction(fname, action, function(err,data) {
+								if (err) {
+									console.log('Error while sending function: '+err);
+								}
+								else {
+								res.location("db/"+req.body.expname);
+								res.redirect("db/"+req.body.expname);
+								}
+							});
+						}
+					}
+				});
+			}
+		});
+	});
+							
 	return router;	
 }
 

@@ -24,6 +24,7 @@
     "connect-flash":"*",
     "express-session":"*",
     "mongoose":"*",
-    "moment":"*"
+    "moment":"*",
+    "spark":"*"
   }
 }

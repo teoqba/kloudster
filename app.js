@@ -7,9 +7,10 @@ var bodyParser = require('body-parser');
 var sendTextMessage = require('./functions/sendTextMessage');
 var convJSONValsToNumber = require('./functions/convJSONValsToNumber');
 var fs = require('fs');
+var spark = require('spark');
+
 
 // Spark Core + Twilio
-var spark = require('sparknode');
 var twilio = require('twilio');
 if (!fs.existsSync('./config.json')) {
 	console.error('Please create a config.json -- check config.json.sample');
@@ -18,6 +19,7 @@ if (!fs.existsSync('./config.json')) {
 
 var config = require('./config.json');
 
+spark.login({accessToken:config.sparkAccessToken});
 // Mongo
 var mongo = require('mongoskin');
 var dbAddress = 'mongodb://' + config.dbUser + ':' + config.dbPwd +
@@ -31,12 +33,6 @@ var dbConfig = require('./dbm');
 var mongoose = require('mongoose');
 // Connect to DB
 mongoose.connect(dbConfig.url);
-
-// Spark setup
-var core = new spark.Core({
-	accessToken: config.sparkAccessToken,
-        id: config.sparkDeviceID
-});
 
 //Twilio setup
 var twilioClient = require('twilio')(config.twilioAccountSID, 
@@ -72,10 +68,11 @@ var initPassport = require('./passport/init');
 initPassport(passport);
 
 var routes = require('./routes/index')(passport);
-core.on('meas', function(data) {
+spark.listDevices().then(function(devices){
+	devices[0].onEvent('meas',function(data){
 	console.log('Got Event');
 	var collection = db.collection('Experiments');
-	collection.findOne({'device':'Sparky','live':1},function(err,docs){
+	collection.findOne({'device':'sparky','live':1},function(err,docs){
 		if (err) {
 			console.log("Coudn't find device: " + err);
 		}
@@ -96,13 +93,14 @@ core.on('meas', function(data) {
 		}
 	});
 });
-
-core.on('alarm', function(data) {
-	sendTextMessage("Spark Core RESET");
 });
 
 app.use(function(req, res, next){
 	req.db = db;
+	next();
+});
+app.use(function(req, res, next){
+	req.sparkID = spark;
 	next();
 });
 
