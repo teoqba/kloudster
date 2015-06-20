@@ -59,7 +59,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var passport = require('passport');
 var expressSession = require('express-session');
-app.use(expressSession({secret: 'mySecretKey'}));
+app.use(expressSession({secret: 'mySecretKey',resave:true,  saveUninitialized: true}));
 app.use(passport.initialize());
 app.use(passport.session());
 var flash = require('connect-flash');
@@ -68,8 +68,12 @@ var initPassport = require('./passport/init');
 initPassport(passport);
 
 var routes = require('./routes/index')(passport);
-spark.listDevices().then(function(devices){
-	devices[0].onEvent('meas',function(data){
+spark.listDevices(function(err,devices){
+	if (err) {
+		console.log("Error listing devices " + err);
+	}
+	var device = devices[0];
+	device.onEvent('meas',function(data){
 	console.log('Got Event');
 	var collection = db.collection('Experiments');
 	collection.findOne({'device':'sparky','live':1},function(err,docs){

@@ -75,7 +75,7 @@ module.exports = function(passport){
 					var collection = db.collection('Data');
 					collection.find({'userid':req.user.username,'expname':req.db2print})
 		                	.sort({$natural:-1}).toArray(function(err,docs){
-						res.render('results', {'data':docs,'functions':functions,
+						res.render('results-rh', {'data':docs,'functions':functions,
 					        	  'title': req.db2print
 						});
 					});

@@ -25,10 +25,12 @@ block content
       thead
         th Time of the day
         th Elapsed time [s]
-        th Pressure [psi]
+        th Relative humidity [%]
+        th Temperature [C]
       tbody
         each point, i in data
           tr
             td #{moment(point.logged_on).format("YYYY/MM/DD HH:mm:ss")}
             td #{point.time}
-            td #{point.pressure} 
+            td #{point.rh} 
+            td #{point.temp}
