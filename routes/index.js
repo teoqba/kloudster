@@ -6,6 +6,8 @@ var config = require('../config.json');
 var bCrypt = require('bcrypt-nodejs');
 var addNewUser = require('../functions/addNewUser');
 var moment = require('moment');
+var plotly = require('plotly')("teoqba", "zxkvkkvv6b");
+var opener = require('opener');
 
 var isAuthenticated = function(req,res,next) {
 	if(req.isAuthenticated())
@@ -319,7 +321,39 @@ module.exports = function(passport){
 			}
 		});
 	});
-							
+
+	//plot temperature
+	router.post('/plotTemp',isAuthenticated, function(req,res,next){
+		var username = req.user.username;
+		var expname = req.body.expname;
+		var db = req.db;
+		var spark = req.sparkID;
+		//Find the device running this experiment
+		collection = db.collection('DataEmb');
+		collection.findOne({'userid':username,'expname':expname},function(err,docs){
+			if (err) {
+				res.send('Error retrieving experiment: '+err);
+			}
+			else {
+				var values = docs.values;
+				var xx = Object.keys(values);
+				yy=[];
+				for (v in values) {
+					yy.push(values[v]);
+				}
+				var data = [{x:xx,y:yy,type:"scatter"}];
+				var layout = {xaxis:{nticks:4,tickfont:{size:10}},
+					      yaxis:{title:"Temperature [C]"}};
+				var graphOptions = {layout:layout, filename: "date-axes", fileopt: "overwrite"};
+				plotly.plot(data, graphOptions, function (err, msg) {
+					    console.log(msg);
+				});
+				res.location("db/"+req.body.expname);
+				res.redirect("db/"+req.body.expname);
+			}
+		});
+	});
+
 	return router;	
 }
 

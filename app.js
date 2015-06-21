@@ -102,8 +102,10 @@ spark.listDevices(function(err,devices){
 //				var time = jData.time;
 				var time = jData.logged_on
 				var val= jData.temp;
+				var val2 = jData.rh;
 				var obj={};
-				obj["values."+time]=val;
+				obj["values."+time] = val;
+				obj["values2."+time] = val2;
 				collection.update({userid:docs.userid, expname:docs.expname},
 						  {$set:obj},{upsert:true}, function(err,doc) {
 					if (err){

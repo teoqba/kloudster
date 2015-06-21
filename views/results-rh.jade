@@ -19,7 +19,12 @@ block content
                 button(type="submit",name="fOff",value=point) Off
   form#formControl(name="control",method="post",action="/controlCheck")
     button#buttonControl(type="submit",name="expname",value=title) Check for control
+  form#formControl(name="control",method="post",action="/plotTemp")
+    button#buttonControl(type="submit",name="expname",value=title) Plot Temperature
+
+
   h1 Experiment: #{title}
+  iframe(width="640" height="480" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~teoqba/7.embed?width=640&height=480")
   #resultTable
     table
       thead
