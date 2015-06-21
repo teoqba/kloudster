@@ -63,6 +63,13 @@ module.exports = function(passport){
 	router.get('/db/:db2print', isAuthenticated, function(req,res) {
 		var db = req.db;
 		var collection = db.collection('Experiments');
+		//Choose proper jade template to render
+		if (req.db2print == "TempHumidity") {
+			var renTemplate = 'results-rh';
+		}
+		else {
+			var renTemplate = 'results-def';
+		}
 		collection.findOne({'userid':req.user.username,'expname':req.db2print},
 			function(err,docs1){
 				if (err) {
@@ -75,7 +82,7 @@ module.exports = function(passport){
 					var collection = db.collection('Data');
 					collection.find({'userid':req.user.username,'expname':req.db2print})
 		                	.sort({$natural:-1}).toArray(function(err,docs){
-						res.render('results-rh', {'data':docs,'functions':functions,
+						res.render(renTemplate, {'data':docs,'functions':functions,
 					        	  'title': req.db2print
 						});
 					});

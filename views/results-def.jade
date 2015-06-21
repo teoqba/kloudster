@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  h1 Experiment Control
+  if functions 
+  #resultTable
+    table
+      thead
+        th Functions
+        th Action
+      tbody
+        each point, i in functions
+          tr
+            td #{point}
+            td
+              form#formControl(name="toggleAction",method="post",action="/toggleAction") 
+                input(type="hidden" name="expname", value=title)
+                button(type="submit",name="fOn",value=point) On
+                button(type="submit",name="fOff",value=point) Off
+  form#formControl(name="control",method="post",action="/controlCheck")
+    button#buttonControl(type="submit",name="expname",value=title) Check for control
+  h1 Experiment: #{title}
+  #resultTable
+    table
+      thead
+        th Time of the day
+        th Elapsed time [s]
+        th Value 1
+        th Value 2 
+      tbody
+        each point, i in data
+          tr
+            td #{moment(point.logged_on).format("YYYY/MM/DD HH:mm:ss")}
+            td #{point.time}
+            td #{point.rh} 
+            td #{point.temp}
