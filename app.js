@@ -94,6 +94,24 @@ spark.listDevices(function(err,devices){
 					console.log("Problem inserting data"+ err);
 				}
 			});
+			// Insert embedded data as well to DataEmb collection
+			// Only one field "values" currently supported
+			// Log onle temerature
+			if (jData.temp) {
+				var collection = db.collection('DataEmb');
+//				var time = jData.time;
+				var time = jData.logged_on
+				var val= jData.temp;
+				var obj={};
+				obj["values."+time]=val;
+				collection.update({userid:docs.userid, expname:docs.expname},
+						  {$set:obj},{upsert:true}, function(err,doc) {
+					if (err){
+						console.log("Problem inserting data"+ err);
+					}
+				});
+			}
+
 		}
 	});
 });
