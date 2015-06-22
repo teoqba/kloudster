@@ -7,7 +7,7 @@ var bCrypt = require('bcrypt-nodejs');
 var addNewUser = require('../functions/addNewUser');
 var moment = require('moment');
 var plotly = require('plotly')("teoqba", "zxkvkkvv6b");
-var opener = require('opener');
+var plotF = require('../functions/plotF');
 
 var isAuthenticated = function(req,res,next) {
 	if(req.isAuthenticated())
@@ -68,6 +68,8 @@ module.exports = function(passport){
 		//Choose proper jade template to render
 		if (req.db2print == "TempHumidity") {
 			var renTemplate = 'results-rh';
+//			plotURL = plotF(req);
+//			console.log(plotURL);
 		}
 		else {
 			var renTemplate = 'results-def';
@@ -336,14 +338,24 @@ module.exports = function(passport){
 			}
 			else {
 				var values = docs.values;
+				var values2 = docs.values2;
 				var xx = Object.keys(values);
 				yy=[];
+				var xx2 = Object.keys(values2);
+				yy2=[];
+
 				for (v in values) {
 					yy.push(values[v]);
 				}
-				var data = [{x:xx,y:yy,type:"scatter"}];
+				for (v in values2) {
+					yy2.push(values2[v]);
+				}
+				var trace1 = {x:xx,y:yy,type:"scatter"};
+				var trace2 = {x:xx2,y:yy2,type:"scatter",yaxis:"y2"};
+				var data = [trace1, trace2];
 				var layout = {xaxis:{nticks:4,tickfont:{size:10}},
-					      yaxis:{title:"Temperature [C]"}};
+					      yaxis:{title:"Temperature [C]"},
+					      yaxis2:{title: "Rel. Humidity [%]",side:"right",overlaying: "y"}};
 				var graphOptions = {layout:layout, filename: "date-axes", fileopt: "overwrite"};
 				plotly.plot(data, graphOptions, function (err, msg) {
 					    console.log(msg);
